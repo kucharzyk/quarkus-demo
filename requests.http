@@ -1,0 +1,5 @@
+### GET random quote
+GET http://localhost:8080/quotes/random
+Content-Type: */*
+
+###
