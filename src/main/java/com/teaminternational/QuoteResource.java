@@ -3,15 +3,19 @@ package com.teaminternational;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
-import java.util.UUID;
-
 @Path("/quotes")
 public class QuoteResource {
+
+    private final QuoteService quoteService;
+
+    public QuoteResource(QuoteService quoteService) {
+        this.quoteService = quoteService;
+    }
 
     @GET
     @Path("/random")
     public Quote getRandomQuote() {
-        return new Quote(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        return quoteService.getRandomQuote();
     }
 
 }

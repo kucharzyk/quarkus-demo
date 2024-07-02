@@ -134,3 +134,155 @@ class QuoteResourceTest {
     }
 }
 ```
+
+## step 3
+
+* introduce ```QuoteService```
+
+```java
+package com.teaminternational;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
+import java.util.UUID;
+
+@ApplicationScoped
+public class QuoteService {
+
+    public Quote getRandomQuote() {
+        return new Quote(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    }
+
+}
+```
+
+* inject service to quote resource
+
+```java
+package com.teaminternational;
+
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+
+@Path("/quotes")
+public class QuoteResource {
+
+    private final QuoteService quoteService;
+
+    public QuoteResource(QuoteService quoteService) {
+        this.quoteService = quoteService;
+    }
+
+    @GET
+    @Path("/random")
+    public Quote getRandomQuote() {
+        return quoteService.getRandomQuote();
+    }
+
+}
+
+```
+
+* add database dependencies
+
+```xml
+       <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
+```
+
+* modify `Quote` to make it entity
+
+```java
+package com.teaminternational;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "quotes")
+public class Quote {
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String author;
+    private String quote;
+
+    protected Quote() {
+    }
+    
+    ///...
+}
+```
+
+* create ```QuoteRepository```
+
+```java
+package com.teaminternational;
+
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
+
+public interface QuoteRepository extends PanacheRepository<Quote> {
+}
+```
+
+* update ```QuoteService```
+
+```java
+package com.teaminternational;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+
+import java.util.UUID;
+
+@ApplicationScoped
+public class QuoteService {
+
+    private final QuoteRepository quoteRepository;
+
+    public QuoteService(QuoteRepository quoteRepository) {
+        this.quoteRepository = quoteRepository;
+    }
+
+    @Transactional
+    public Quote getRandomQuote() {
+        Quote quote = new Quote(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        quoteRepository.persist(quote);
+        return quote;
+    }
+
+}
+
+```
+
+* fix broken test
+
+```java
+    @Test
+    void getRandomQuote() {
+        RestAssured.given()
+                .get("/quotes/random")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .body("id", Matchers.notNullValue())
+                .body("author", Matchers.notNullValue())
+                .body("quote", Matchers.notNullValue());
+    }
+```

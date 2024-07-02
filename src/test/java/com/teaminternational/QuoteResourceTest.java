@@ -15,7 +15,7 @@ class QuoteResourceTest {
                 .then()
                 .assertThat()
                 .statusCode(200)
-                .body("id", Matchers.nullValue())
+                .body("id", Matchers.notNullValue())
                 .body("author", Matchers.notNullValue())
                 .body("quote", Matchers.notNullValue());
     }

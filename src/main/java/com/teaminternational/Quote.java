@@ -1,9 +1,21 @@
 package com.teaminternational;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "quotes")
 public class Quote {
+    @Id
+    @GeneratedValue
     private Long id;
     private String author;
     private String quote;
+
+    protected Quote() {
+    }
 
     public Quote(String author, String quote) {
         this.author = author;
