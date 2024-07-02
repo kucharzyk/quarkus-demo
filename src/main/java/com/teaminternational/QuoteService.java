@@ -3,6 +3,7 @@ package com.teaminternational;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -21,4 +22,7 @@ public class QuoteService {
         return quote;
     }
 
+    public List<Quote> getAllQuotes() {
+        return quoteRepository.listAll();
+    }
 }

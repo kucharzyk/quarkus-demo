@@ -8,6 +8,22 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 class QuoteResourceTest {
 
+    private final QuoteRepository quoteRepository;
+
+    public QuoteResourceTest(QuoteRepository quoteRepository) {
+        this.quoteRepository = quoteRepository;
+    }
+
+    @Test
+    void getAllQuotes() {
+        RestAssured.given()
+                .get("/quotes")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .body("$", Matchers.hasSize((int) quoteRepository.count()));
+    }
+
     @Test
     void getRandomQuote() {
         RestAssured.given()

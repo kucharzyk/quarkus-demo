@@ -286,3 +286,42 @@ public class QuoteService {
                 .body("quote", Matchers.notNullValue());
     }
 ```
+
+## step 4
+
+* add getAllQuotes method in ```QuoteService```
+
+```java
+    public List<Quote> getAllQuotes() {
+        return quoteRepository.listAll();
+    }
+```
+
+* update resource
+
+```java
+    @GET
+    public List<Quote> getAllQuotes() {
+        return quoteService.getAllQuotes();
+    }
+```
+
+* add test
+
+```java
+    private final QuoteRepository quoteRepository;
+
+    public QuoteResourceTest(QuoteRepository quoteRepository) {
+        this.quoteRepository = quoteRepository;
+    }
+
+    @Test
+    void getAllQuotes() {
+        RestAssured.given()
+                .get("/quotes")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .body("$", Matchers.hasSize((int) quoteRepository.count()));
+    }
+```

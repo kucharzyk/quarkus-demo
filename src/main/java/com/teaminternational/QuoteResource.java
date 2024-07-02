@@ -3,6 +3,8 @@ package com.teaminternational;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
+import java.util.List;
+
 @Path("/quotes")
 public class QuoteResource {
 
@@ -10,6 +12,11 @@ public class QuoteResource {
 
     public QuoteResource(QuoteService quoteService) {
         this.quoteService = quoteService;
+    }
+
+    @GET
+    public List<Quote> getAllQuotes() {
+        return quoteService.getAllQuotes();
     }
 
     @GET
