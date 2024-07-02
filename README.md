@@ -325,3 +325,48 @@ public class QuoteService {
                 .body("$", Matchers.hasSize((int) quoteRepository.count()));
     }
 ```
+
+## step 5
+
+* create local database using docker
+
+```bash
+docker run --name quarkus-demo-postgres -e POSTGRES_USER=quarkus -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=quarkus -d -p5432:5432 postgres 
+ 
+docker start quarkus-demo-postgres
+```
+
+* add database config to ```application.properties```
+
+```properties
+quarkus.datasource.db-kind=postgresql
+quarkus.hibernate-orm.physical-naming-strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+quarkus.hibernate-orm.database.generation=update
+
+%prod.quarkus.datasource.username=quarkus
+%prod.quarkus.datasource.password=mysecretpassword
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://127.0.0.1:5432/quarkus
+
+%dev.quarkus.datasource.username=quarkus
+%dev.quarkus.datasource.password=mysecretpassword
+%dev.quarkus.datasource.jdbc.url=jdbc:postgresql://127.0.0.1:5432/quarkus
+
+%dev.quarkus.hibernate-orm.log.bind-parameters=true
+%dev.quarkus.hibernate-orm.log.sql=true
+```
+
+* update entity to make sure we can handle long text
+
+```java
+    @Column(columnDefinition = "text")
+    private String author;
+    @Column(columnDefinition = "text")
+    private String quote;
+```
+
+* build service and start it
+
+```bash
+./mvnw clean verify
+java -jar ./target/quarkus-app/quarkus-run.jar
+```

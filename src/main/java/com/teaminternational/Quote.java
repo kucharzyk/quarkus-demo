@@ -1,9 +1,6 @@
 package com.teaminternational;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "quotes")
@@ -11,7 +8,9 @@ public class Quote {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(columnDefinition = "text")
     private String author;
+    @Column(columnDefinition = "text")
     private String quote;
 
     protected Quote() {
