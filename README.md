@@ -469,3 +469,67 @@ public class QuoteService {
     }
 }
 ```
+
+## step 8
+
+* add quote
+
+```xml
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-qute</artifactId>
+        </dependency>
+```
+
+* create chat resource
+
+```java
+package com.teaminternational;
+
+import io.quarkus.qute.Template;
+import io.quarkus.qute.TemplateInstance;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
+@Path("")
+public class Chat {
+
+    private final Template chat;
+    
+    public Chat(Template chat) {
+        this.chat = chat;
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance getChatPage() {
+        return chat.instance();
+    }
+}
+```
+
+* create template in ```resources/templates/chat.html```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HAL 9000</title>
+  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+  <script src="https://unpkg.com/htmx-ext-ws@2.0.0/ws.js"></script>
+</head>
+<body style="display: flex; flex-direction: column; align-items: center;">
+<h1>HAL 9000</h1>
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/HAL9000.svg/256px-HAL9000.svg.png" alt="AI logo" style="margin: 2em;">
+<div hx-ext="ws" ws-connect="/ai-ws" class="chat">
+  <div id="notifications" ></div>
+  <form ws-send hx-on:submit="htmx.find('#message').value=''">
+    <input name="message" id="message" autofocus style="width: 90vw;">
+  </form>
+</div>
+</body>
+</html>
+```
