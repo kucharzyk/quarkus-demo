@@ -10,7 +10,7 @@
 <h1>HAL 9000</h1>
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/HAL9000.svg/256px-HAL9000.svg.png" alt="AI logo" style="margin: 2em;">
 <div hx-ext="ws" ws-connect="/ai-ws" class="chat">
-  <div id="notifications" ></div>
+  <div id="notifications" style="max-width: 90vw"></div>
   <form ws-send hx-on:submit="htmx.find('#message').value=''">
     <input name="message" id="message" autofocus style="width: 90vw;">
   </form>

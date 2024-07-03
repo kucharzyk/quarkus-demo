@@ -85,6 +85,10 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-qute</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-websockets-next</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

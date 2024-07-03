@@ -533,3 +533,110 @@ public class Chat {
 </body>
 </html>
 ```
+
+
+## step 9
+
+* remove ```@SessionScoped``` from ```Hal9000``` to fix test
+
+* create chat message object
+
+```java
+package com.teaminternational;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Map;
+
+public record ChatMessage(String message, @JsonProperty("HEADERS") Map<String, Object> headers) {
+}
+
+```
+
+* add websockets
+
+```xml
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-websockets-next</artifactId>
+        </dependency>
+```
+
+* create ```Hal900Chat```
+
+```java
+
+package com.teaminternational;
+
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import io.quarkiverse.langchain4j.RegisterAiService;
+import io.smallrye.mutiny.Multi;
+
+@RegisterAiService
+public interface Hal9000Chat {
+
+    @SystemMessage("Please pretend to be evil robot called HAL 9000.")
+    Multi<String> ask(
+            @UserMessage String message
+    );
+}
+
+```
+
+* implement websocket 
+
+```java
+package com.teaminternational;
+
+import io.quarkus.logging.Log;
+import io.quarkus.websockets.next.OnOpen;
+import io.quarkus.websockets.next.OnTextMessage;
+import io.quarkus.websockets.next.WebSocket;
+import io.smallrye.mutiny.Multi;
+import jakarta.inject.Inject;
+
+@WebSocket(path = "/ai-ws")
+public class AiWebSocket {
+
+    @Inject
+    Hal9000Chat hal9000Chat;
+
+    @OnOpen
+    public Multi<String> onOpen() {
+        return Multi.createBy().concatenating().streams(
+                Multi.createFrom().item(wrapAsHTMXResponse("<b>AI: </b>")),
+                hal9000Chat.ask("Say hello to me and ask if I need help").map(this::wrapAsHTMXResponse),
+                Multi.createFrom().item(wrapAsHTMXResponse("<br/><br/>"))
+        );
+    }
+
+    @OnTextMessage
+    public Multi<String> onMessage(ChatMessage message) {
+        if (message.message() == null || message.message().isEmpty()) {
+            return Multi.createFrom().empty();
+        }
+
+        Log.info(message);
+        return Multi.createBy().concatenating().streams(
+                Multi.createFrom().item(wrapAsHTMXResponse("<b>You: </b>" + message.message() + "<br/></br>")),
+                Multi.createFrom().item(wrapAsHTMXResponse("<b>AI: </b>")),
+                hal9000Chat.ask(message.message()).map(this::wrapAsHTMXResponse),
+                Multi.createFrom().item(wrapAsHTMXResponse("<br/><br/>"))
+        );
+
+    }
+
+    private String wrapAsHTMXResponse(String it) {
+        return "<div id=\"notifications\" hx-swap-oob=\"beforeend\"><span>" + it + "</span></div>";
+    }
+}
+
+
+```
+
+* add style to notifications
+
+```html
+<div id="notifications" style="max-width: 90vw"></div>
+```
