@@ -370,3 +370,26 @@ quarkus.hibernate-orm.database.generation=update
 ./mvnw clean verify
 java -jar ./target/quarkus-app/quarkus-run.jar
 ```
+
+## step 6 (native container build - optional)
+
+* update ```pom.xml```
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-container-image-docker</artifactId>
+</dependency>
+```
+
+* build image
+
+```bash
+./mvnw clean install -Dnative -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true
+```
+
+* run image (note: we are overriding database url to access localhost from docker container)
+
+```bash
+docker run -it --rm -p 8080:8080 -e QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://host.docker.internal:5432/quarkus tomasz/quarkus-demo:1.0.0-SNAPSHOT
+```
