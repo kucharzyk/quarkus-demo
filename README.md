@@ -393,3 +393,79 @@ java -jar ./target/quarkus-app/quarkus-run.jar
 ```bash
 docker run -it --rm -p 8080:8080 -e QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://host.docker.internal:5432/quarkus tomasz/quarkus-demo:1.0.0-SNAPSHOT
 ```
+
+## step 7
+
+* install Ollama and Llama3 [https://ollama.com](https://ollama.com)
+
+* add langchain4j ollama integration
+
+```xml
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-ollama</artifactId>
+            <version>0.15.1</version>
+        </dependency>
+```
+
+* create AI
+
+```java
+package com.teaminternational;
+
+import dev.langchain4j.service.UserMessage;
+import io.quarkiverse.langchain4j.RegisterAiService;
+import jakarta.enterprise.context.SessionScoped;
+
+@RegisterAiService
+@SessionScoped
+public interface Hal9000 {
+
+    @UserMessage("""
+             Dear Sir/Madam,
+            
+             Please return random quote.
+             Respond in JSON format only by providing object with fields author and quote.
+             Do not add anything else except json to response!
+            
+             Thanks.
+            """)
+    Quote getRandomQuote();
+}
+
+```
+
+* use AI in ```QuoteService```
+
+```java
+package com.teaminternational;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+
+import java.util.List;
+
+@ApplicationScoped
+public class QuoteService {
+
+    private final QuoteRepository quoteRepository;
+    private final Hal9000 hal9000;
+
+    public QuoteService(QuoteRepository quoteRepository, Hal9000 hal9000) {
+        this.quoteRepository = quoteRepository;
+        this.hal9000 = hal9000;
+    }
+
+    @Transactional
+    public Quote getRandomQuote() {
+        Quote aiQuote = hal9000.getRandomQuote();
+
+        Quote quote = new Quote(aiQuote.getAuthor(), aiQuote.getQuote());
+        quoteRepository.persist(quote);
+        return quote;
+    }
+    public List<Quote> getAllQuotes() {
+        return quoteRepository.listAll();
+    }
+}
+```
