@@ -640,3 +640,32 @@ public class AiWebSocket {
 ```html
 <div id="notifications" style="max-width: 90vw"></div>
 ```
+## step 10 (native container build)
+
+* register ```ChatMessage``` for reflection
+
+```java
+package com.teaminternational;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+import java.util.Map;
+
+@RegisterForReflection
+public record ChatMessage(String message, @JsonProperty("HEADERS") Map<String, Object> headers) {
+}
+
+```
+
+* build image
+
+```bash
+./mvnw clean install -Dnative -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true
+```
+
+* run image (note: we are overriding database url to access localhost from docker container)
+
+```bash
+docker run -it --rm -p 8080:8080 -e QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://host.docker.internal:5432/quarkus -e QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL=http://host.docker.internal:11434 tomasz/quarkus-demo:1.0.0-SNAPSHOT
+```
