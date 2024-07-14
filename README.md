@@ -671,3 +671,11 @@ public record ChatMessage(String message, @JsonProperty("HEADERS") Map<String, O
 ```bash
 docker run -it --rm -p 8080:8080 -e QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://host.docker.internal:5432/quarkus -e QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL=http://host.docker.internal:11434 tomasz/quarkus-demo:1.0.0-SNAPSHOT
 ```
+
+## NOTES
+
+There is an issue with current version of langchain4j and latest ollama (2.0.5)
+
+https://github.com/langchain4j/langchain4j/issues/1461
+
+It's working fine with 0.1.45
